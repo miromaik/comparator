@@ -1084,23 +1084,14 @@ export function mount(container: HTMLElement): void {
     })
 
     container.innerHTML = `
-      <div class="tool-content fade-in">
-        <div class="tool-header">
-          <div class="tool-badge">World & Schematics</div>
-          <h2>Schematic & Litematica 3D Studio</h2>
-          <p class="tool-desc">Upload .litematic, .schem or .schematic blueprints to inspect full 3D interactive voxel models, layer-by-layer blueprints, and materials shopping lists.</p>
-        </div>
-
-        <div class="generator-layout">
-          <!-- Left Column: Upload, Metadata & Materials -->
-          <div class="config-column">
-            <!-- Dropzone & Quick Demos -->
-            <div class="panel">
-              <div class="panel-header-inline">
-                <h3 class="panel-title">Upload Blueprint</h3>
-                <span class="badge badge-accent">${s.format.toUpperCase()}</span>
-              </div>
-
+      <div class="schem-layout">
+        <div class="schem-config-col">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Upload Blueprint</span>
+              <span class="badge badge-accent">${s.format.toUpperCase()}</span>
+            </div>
+            <div class="panel-body">
               <div id="schem-dropzone" class="schem-dropzone-box">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1112,52 +1103,54 @@ export function mount(container: HTMLElement): void {
                 <input type="file" id="schem-file-input" accept=".litematic,.schem,.schematic" style="display: none;" />
               </div>
 
-              <!-- Quick Demo Blueprints -->
-              <div class="mt-3">
-                <label class="form-label" style="font-size: 0.72rem;">Try Example Blueprints:</label>
+              <div class="form-group mt-3" style="margin-bottom: 0;">
+                <label class="form-label">Example Blueprints</label>
                 <div class="btn-grid-2">
-                  <button class="btn btn-sm btn-secondary" id="btn-demo-clock">Demo: Redstone Clock (5×3×5)</button>
-                  <button class="btn btn-sm btn-secondary" id="btn-demo-cottage">Demo: Survival Cottage (7×6×7)</button>
+                  <button class="btn btn-sm btn-secondary" id="btn-demo-clock">Redstone Clock (5x3x5)</button>
+                  <button class="btn btn-sm btn-secondary" id="btn-demo-cottage">Survival Cottage (7x6x7)</button>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Structure Metadata -->
-            <div class="panel mt-4">
-              <h3 class="panel-title">Structure Information</h3>
-              <div class="info-grid mt-2">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Structure Information</span>
+            </div>
+            <div class="panel-body">
+              <div class="info-grid">
                 <div class="info-row">
-                  <span>Name:</span>
-                  <strong class="text-truncate" style="max-width: 180px;">${s.name}</strong>
+                  <span>Name</span>
+                  <strong class="text-truncate" style="max-width: 200px;">${s.name}</strong>
                 </div>
                 <div class="info-row">
-                  <span>Author:</span>
+                  <span>Author</span>
                   <strong>${s.author}</strong>
                 </div>
                 <div class="info-row">
-                  <span>Dimensions (X × Y × Z):</span>
-                  <strong>${s.width} × ${s.height} × ${s.length}</strong>
+                  <span>Dimensions (X x Y x Z)</span>
+                  <strong>${s.width} x ${s.height} x ${s.length}</strong>
                 </div>
                 <div class="info-row">
-                  <span>Total Placed Blocks:</span>
-                  <strong style="color: var(--accent-red);">${formatNumber(s.totalBlocks)} blocks</strong>
+                  <span>Placed Blocks</span>
+                  <strong style="color: var(--accent-red);">${formatNumber(s.totalBlocks)}</strong>
                 </div>
                 <div class="info-row">
-                  <span>Enclosing Volume:</span>
+                  <span>Volume</span>
                   <strong>${formatNumber(s.volume)} blocks³</strong>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Materials / Bill of Materials (BOM) -->
-            <div class="panel mt-4">
-              <div class="panel-header-inline">
-                <h3 class="panel-title">Material Shopping List</h3>
-                <button class="btn btn-secondary btn-sm" id="btn-copy-materials">Copy List</button>
-              </div>
-
-              <div class="form-group mt-2">
-                <input type="text" id="mat-filter" class="input input-sm" placeholder="Filter materials (e.g. stone, repeater)..." value="${materialFilter}" />
+                      <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Material Shopping List</span>
+              <button class="btn btn-secondary btn-sm" id="btn-copy-materials">Copy List</button>
+            </div>
+            <div class="panel-body">
+              <div class="form-group" style="margin-bottom: 12px;">
+                <input type="text" id="mat-filter" class="form-input form-input-sm" placeholder="Filter materials..." value="${materialFilter}" />
               </div>
 
               <div class="schem-materials-table-wrap">
@@ -1169,9 +1162,9 @@ export function mount(container: HTMLElement): void {
                       <th style="text-align: right;">Stacks</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody id="schem-mat-tbody">
                     ${filteredMaterials.length === 0 ? `
-                      <tr><td colspan="3" style="text-align: center; color: var(--text-tertiary); padding: 12px;">No matching materials found</td></tr>
+                      <tr><td colspan="3" style="text-align: center; color: var(--text-tertiary); padding: 16px;">No matching materials found</td></tr>
                     ` : filteredMaterials.map(m => `
                       <tr>
                         <td>
@@ -1181,68 +1174,66 @@ export function mount(container: HTMLElement): void {
                           </div>
                         </td>
                         <td style="text-align: right; font-family: var(--font-mono); font-weight: 600;">${m.count}</td>
-                        <td style="text-align: right; font-family: var(--font-mono); color: var(--text-secondary); font-size: 0.76rem;">${m.stacks}</td>
+                        <td style="text-align: right; font-family: var(--font-mono); color: var(--text-secondary); font-size: 0.82rem;">${m.stacks}</td>
                       </tr>
-                    `).join('')}
+                    `).join("")}
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Right Column: Visualizer (3D Interactive vs 2D Slice) -->
-          <div class="preview-column">
-            <div class="panel">
-              <!-- Visualizer Mode Tabs -->
-              <div class="panel-header-inline" style="flex-wrap: wrap; gap: 8px;">
-                <div class="syntax-toggle-bar">
-                  <button class="syntax-toggle-btn ${activeTab === '3d' ? 'active' : ''}" data-view="3d">
-                    3D Voxel Model
-                  </button>
-                  <button class="syntax-toggle-btn ${activeTab === 'slice' ? 'active' : ''}" data-view="slice">
-                    2D Blueprint Slice
-                  </button>
-                </div>
-
-                ${activeTab === '3d' ? `
-                  <div class="schem-3d-actions">
-                    <button class="btn btn-sm btn-secondary" id="btn-3d-spin" title="Toggle Auto-Spin">⟳ Spin</button>
-                    <button class="btn btn-sm btn-secondary" id="btn-3d-reset" title="Reset Camera View">⌖ Reset</button>
-                    <button class="btn btn-sm btn-secondary" id="btn-3d-zoomin" title="Zoom In">+</button>
-                    <button class="btn btn-sm btn-secondary" id="btn-3d-zoomout" title="Zoom Out">−</button>
-                  </div>
-                ` : ''}
+        <div class="schem-preview-col">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="syntax-toggle-bar">
+                <button class="syntax-toggle-btn ${activeTab === "3d" ? "active" : ""}" data-view="3d">
+                  3D Voxel Model
+                </button>
+                <button class="syntax-toggle-btn ${activeTab === "slice" ? "active" : ""}" data-view="slice">
+                  2D Blueprint Slice
+                </button>
               </div>
 
-              <!-- 3D Layer Cut Slider -->
-              ${activeTab === '3d' ? `
-                <div class="form-group mt-3" style="margin-bottom: 8px;">
+              ${activeTab === "3d" ? `
+                <div class="schem-3d-actions">
+                  <button class="btn btn-sm btn-secondary" id="btn-3d-spin" title="Toggle Auto-Spin">⟳ Spin</button>
+                  <button class="btn btn-sm btn-secondary" id="btn-3d-reset" title="Reset Camera View">⌖ Reset</button>
+                  <button class="btn btn-sm btn-secondary" id="btn-3d-zoomin" title="Zoom In">+</button>
+                  <button class="btn btn-sm btn-secondary" id="btn-3d-zoomout" title="Zoom Out">−</button>
+                </div>
+              ` : ""}
+            </div>
+
+            <div class="panel-body">
+              ${activeTab === "3d" ? `
+                <div class="form-group" style="margin-bottom: 12px;">
                   <div class="form-label-row">
-                    <label class="form-label" style="font-size: 0.78rem;">
+                    <label class="form-label">
                       3D Cut Roof / Max Layer: 
-                      <strong id="lbl-3d-layer">${currentLayer >= s.height - 1 ? 'All Layers (Full)' : `Layer 0 .. ${currentLayer}`}</strong>
+                      <strong id="lbl-3d-layer">${currentLayer >= s.height - 1 ? "All Layers (Full)" : `Layer 0 - ${currentLayer}`}</strong>
                     </label>
                   </div>
                   <input type="range" id="schem-3d-slider" class="range-slider" min="0" max="${s.height - 1}" value="${currentLayer}" />
                 </div>
               ` : `
-                <div class="form-group mt-3" style="margin-bottom: 8px;">
+                <div class="form-group" style="margin-bottom: 12px;">
                   <div class="form-label-row">
                     <label class="form-label">Y-Slice Layer: <strong>Level ${currentLayer}</strong> / ${s.height - 1}</label>
-                    <div style="display: flex; gap: 4px;">
-                      <button class="btn btn-sm btn-secondary" id="btn-layer-down" ${currentLayer <= 0 ? 'disabled' : ''}>◀ Lower</button>
-                      <button class="btn btn-sm btn-secondary" id="btn-layer-up" ${currentLayer >= s.height - 1 ? 'disabled' : ''}>Higher ▶</button>
+                    <div style="display: flex; gap: 6px;">
+                      <button class="btn btn-sm btn-secondary" id="btn-layer-down" ${currentLayer <= 0 ? "disabled" : ""}>◀ Lower</button>
+                      <button class="btn btn-sm btn-secondary" id="btn-layer-up" ${currentLayer >= s.height - 1 ? "disabled" : ""}>Higher ▶</button>
                     </div>
                   </div>
                   <input type="range" id="schem-layer-slider" class="range-slider" min="0" max="${s.height - 1}" value="${currentLayer}" />
                 </div>
               `}
 
-              <!-- Canvas Stage -->
               <div class="schem-canvas-stage">
-                ${activeTab === '3d' ? `
-                  <canvas id="schem-3d-canvas" class="schem-3d-canvas" style="width: 100%; height: 460px; display: block; cursor: grab;"></canvas>
-                  <div class="schem-3d-hint">Drag: Rotate 3D • Scroll: Zoom • Right-Click: Pan</div>
+                ${activeTab === "3d" ? `
+                  <canvas id="schem-3d-canvas" class="schem-3d-canvas"></canvas>
+                  <div class="schem-3d-hint">Drag: Rotate - Scroll: Zoom - Right-Click: Pan</div>
                 ` : `
                   <canvas id="schem-canvas" width="600" height="420" class="schem-canvas"></canvas>
                   <div id="schem-tooltip" class="schem-cell-tooltip" style="display: none;"></div>
@@ -1250,8 +1241,8 @@ export function mount(container: HTMLElement): void {
               </div>
 
               <div class="schem-stage-legend">
-                <span>${activeTab === '3d' ? 'Hardware-accelerated WebGL 3D Voxel Engine' : 'Hover cells to inspect coordinates & block states'}</span>
-                <span>${s.width}W × ${s.height}H × ${s.length}L (${formatNumber(s.totalBlocks)} placed blocks)</span>
+                <span>${activeTab === "3d" ? "Hardware-accelerated WebGL 3D Voxel Engine" : "Hover cells to inspect coordinates & block states"}</span>
+                <span>${s.width}W x ${s.height}H x ${s.length}L (${formatNumber(s.totalBlocks)} blocks)</span>
               </div>
             </div>
           </div>
@@ -1461,11 +1452,27 @@ export function mount(container: HTMLElement): void {
     const matInput = container.querySelector<HTMLInputElement>('#mat-filter')
     matInput?.addEventListener('input', () => {
       materialFilter = matInput.value
-      render()
-      const reInput = container.querySelector<HTMLInputElement>('#mat-filter')
-      if (reInput) {
-        reInput.focus()
-        reInput.setSelectionRange(materialFilter.length, materialFilter.length)
+      const tbody = container.querySelector<HTMLElement>('#schem-mat-tbody')
+      if (!tbody) return
+      const filtered = activeSchematic.materials.filter(m => {
+        if (!materialFilter) return true
+        return m.name.toLowerCase().includes(materialFilter.toLowerCase())
+      })
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-tertiary); padding: 16px;">No matching materials found</td></tr>'
+      } else {
+        tbody.innerHTML = filtered.map(m => `
+          <tr>
+            <td>
+              <div class="schem-mat-name-cell">
+                <span class="schem-mat-dot" style="background:${getBlockVoxelColor(m.id)};"></span>
+                <span>${m.name}</span>
+              </div>
+            </td>
+            <td style="text-align: right; font-family: var(--font-mono); font-weight: 600;">${m.count}</td>
+            <td style="text-align: right; font-family: var(--font-mono); color: var(--text-secondary); font-size: 0.82rem;">${m.stacks}</td>
+          </tr>
+        `).join('')
       }
     })
 
