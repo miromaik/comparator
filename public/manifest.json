@@ -1,0 +1,17 @@
+{
+  "name": "comparator - Minecraft Toolbox",
+  "short_name": "comparator",
+  "description": "Minecraft utility toolbox with 38 essential tools",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f12",
+  "theme_color": "#ff3333",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
